@@ -1,0 +1,18 @@
+# data
+data/
+
+# models
+models/
+
+# python
+__pycache__/
+*.pyc
+
+# environments
+venv/
+.env
+
+# model files
+*.pt
+*.pkl
+*.joblib
