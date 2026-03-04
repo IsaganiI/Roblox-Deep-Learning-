@@ -1,18 +1,23 @@
-# data
-data/
-
-# models
-models/
-
-# python
 __pycache__/
 *.pyc
 
-# environments
+# virt envs
 venv/
+.venv/
+env/
 .env
 
 # model files
-*.pt
 *.pkl
 *.joblib
+*.pt
+*.h5
+
+data/
+models/*.pkl
+
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
