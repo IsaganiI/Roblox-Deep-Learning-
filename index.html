@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STRIAX — RBLX Analysis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+ 
+  <!-- Ambient background grid -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+ 
+  <!-- ── HEADER ── -->
+  <header>
+    <div class="header-inner">
+      <div class="logo-block">
+        <span class="logo-text">STR<span class="logo-accent">I</span>AX</span>
+        <span class="logo-tag">Stock Trend &amp; Insight Analysis</span>
+      </div>
+      <div class="header-right">
+        <span class="live-dot"></span>
+        <span class="live-label">Market data · RBLX</span>
+        <span class="beta-badge">BETA</span>
+      </div>
+    </div>
+  </header>
+ 
+  <main>
+ 
+    <!-- ── TICKER STRIP ── -->
+    <div class="ticker-strip">
+      <div class="ticker-main">
+        <span class="ticker-sym">RBLX</span>
+        <span class="ticker-name">Roblox Corporation</span>
+      </div>
+      <div class="ticker-price-block">
+        <span class="ticker-price" id="latestPrice">$--.--</span>
+        <span class="ticker-change" id="priceChange">-- --</span>
+      </div>
+      <div class="ticker-meta-row">
+        <span class="ticker-meta-item">NYSE · Gaming / Metaverse</span>
+        <span class="ticker-meta-sep">·</span>
+        <span class="ticker-meta-item" id="lastUpdated">Last updated: --/--/----</span>
+      </div>
+      <div class="signal-pill" id="signalPill">
+        <span class="signal-dot"></span>
+        <span id="signalLabel">AI Signal: Loading…</span>
+      </div>
+    </div>
+ 
+    <!-- ── METRIC CARDS ── -->
+    <section class="overview">
+      <div class="card metric-card">
+        <div class="card-label">Stock</div>
+        <div class="card-value mono">RBLX</div>
+        <div class="card-sub">NYSE Listed</div>
+      </div>
+      <div class="card metric-card">
+        <div class="card-label">Latest Close</div>
+        <div class="card-value" id="cardPrice">$--.--</div>
+        <div class="card-sub" id="cardChange">-- change</div>
+      </div>
+      <div class="card metric-card">
+        <div class="card-label">Volume</div>
+        <div class="card-value" id="cardVolume">---</div>
+        <div class="card-sub">Daily shares traded</div>
+      </div>
+      <div class="card metric-card">
+        <div class="card-label">Last Updated</div>
+        <div class="card-value mono" id="cardDate">--/--/--</div>
+        <div class="card-sub">Market close</div>
+      </div>
+    </section>
+ 
+    <!-- ── DATA NOTICE ── -->
+    <div class="data-notice" id="dataNotice">
+      <span class="notice-icon">⚠</span>
+      <span>Using <strong>placeholder data</strong> — integrate your Python backend API to populate live RBLX data and ML model output.</span>
+    </div>
+ 
+    <!-- ── PRICE CHART ── -->
+    <section class="chart-section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Price Trend</h2>
+          <p class="section-sub">RBLX daily closing price with moving averages</p>
+        </div>
+        <div class="tab-group">
+          <button class="tab active" onclick="setRange('1w', this)">1W</button>
+          <button class="tab" onclick="setRange('1m', this)">1M</button>
+          <button class="tab" onclick="setRange('6m', this)">6M</button>
+        </div>
+      </div>
+      <div class="legend-row">
+        <span class="legend-item"><span class="legend-swatch" style="background:#60a5fa;"></span>Close Price</span>
+        <span class="legend-item"><span class="legend-swatch swatch-dash" style="background:#fb923c;"></span>7-Day MA</span>
+        <span class="legend-item"><span class="legend-swatch swatch-dash" style="background:#4ade80;"></span>30-Day MA</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="priceChart" role="img" aria-label="RBLX closing price line chart with moving averages">RBLX historical price data with moving average overlays.</canvas>
+      </div>
+    </section>
+ 
+    <!-- ── VOLUME CHART + SIGNAL DONUT ── -->
+    <div class="two-col">
+      <section class="chart-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Daily Volume</h2>
+            <p class="section-sub">Shares traded per session</p>
+          </div>
+        </div>
+        <div class="chart-wrap short">
+          <canvas id="volumeChart" role="img" aria-label="RBLX daily trading volume bar chart">Daily volume data for RBLX.</canvas>
+        </div>
+      </section>
+ 
+      <section class="chart-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">AI Trend Classification</h2>
+            <p class="section-sub">Signal distribution from ML model</p>
+          </div>
+        </div>
+        <div class="legend-row">
+          <span class="legend-item"><span class="legend-swatch" style="background:#4ade80;"></span>Bullish</span>
+          <span class="legend-item"><span class="legend-swatch" style="background:#facc15;"></span>Neutral</span>
+          <span class="legend-item"><span class="legend-swatch" style="background:#f87171;"></span>Bearish</span>
+        </div>
+        <div class="chart-wrap short donut-wrap">
+          <canvas id="signalChart" role="img" aria-label="Donut chart showing AI trend signal distribution">AI signal classification breakdown.</canvas>
+        </div>
+      </section>
+    </div>
+ 
+    <!-- ── AI INSIGHTS + BACKTESTING ── -->
+    <div class="two-col">
+      <section class="insights">
+        <h2 class="section-title">AI Insights</h2>
+        <p class="section-sub" style="margin-bottom:1.25rem;">Generated from model analysis</p>
+        <ul class="insight-list" id="insightList">
+          <li class="insight-item">
+            <span class="insight-dot dot-up"></span>
+            <div class="insight-body">
+              <strong>Trend:</strong>
+              <span id="insightTrend">Neutral — no clear directional momentum detected yet.</span>
+            </div>
+          </li>
+          <li class="insight-item">
+            <span class="insight-dot dot-neutral"></span>
+            <div class="insight-body">
+              <strong>Volatility:</strong>
+              <span id="insightVolatility">Medium — daily returns within ±2% range over last 10 sessions.</span>
+            </div>
+          </li>
+          <li class="insight-item">
+            <span class="insight-dot dot-neutral"></span>
+            <div class="insight-body">
+              <strong>Signal:</strong>
+              <span id="insightSignal">Watch — model confidence below threshold for a strong buy/sell call.</span>
+            </div>
+          </li>
+          <li class="insight-item">
+            <span class="insight-dot dot-down"></span>
+            <div class="insight-body">
+              <strong>Moving Avg:</strong>
+              <span id="insightMA">Price hovering near 7-day MA — no confirmed crossover yet.</span>
+            </div>
+          </li>
+        </ul>
+      </section>
+ 
+      <section class="insights">
+        <h2 class="section-title">Backtest Results</h2>
+        <p class="section-sub" style="margin-bottom:1.25rem;">Simulated model performance (2-yr window)</p>
+        <div class="bt-grid">
+          <div class="bt-row">
+            <span class="bt-label">Total trades simulated</span>
+            <span class="bt-val" id="btTrades">248</span>
+          </div>
+          <div class="bt-row">
+            <span class="bt-label">Win rate</span>
+            <span class="bt-val pos" id="btWinRate">67.4%</span>
+          </div>
+          <div class="bt-row">
+            <span class="bt-label">Avg return / trade</span>
+            <span class="bt-val pos" id="btAvgReturn">+2.3%</span>
+          </div>
+          <div class="bt-row">
+            <span class="bt-label">Max drawdown</span>
+            <span class="bt-val neg" id="btDrawdown">-18.6%</span>
+          </div>
+          <div class="bt-row">
+            <span class="bt-label">Sharpe ratio</span>
+            <span class="bt-val" id="btSharpe">1.14</span>
+          </div>
+          <div class="bt-row">
+            <span class="bt-label">vs Buy &amp; hold</span>
+            <span class="bt-val neg" id="btBenchmark">-4.2%</span>
+          </div>
+        </div>
+      </section>
+    </div>
+ 
+  </main>
+ 
+  <footer>
+    <p>STRIAX is an academic project &mdash; not financial advice.</p>
+    <p class="footer-sub">Built with Chart.js · Python backend · RBLX historical data</p>
+  </footer>
+ 
+  <script src="script.js"></script>
+</body>
+</html>
