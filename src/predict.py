@@ -34,7 +34,7 @@ def predict_latest():
     last_date  = df["Date"].iloc[-1].date()
     last_close = df["Close"].iloc[-1]
 
-    print(f"\n── RBLX Prediction ─────────────────────────────────")
+    print(f"\n RBLX Prediction")
     print(f"Based on data through : {last_date}")
     print(f"Last close            : ${last_close:.2f}")
     print(f"Prediction (next day) : {'UP' if pred == 1 else 'DOWN'}")

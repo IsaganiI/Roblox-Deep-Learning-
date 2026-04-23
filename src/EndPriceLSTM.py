@@ -8,11 +8,14 @@ from sklearn.metrics import accuracy_score, classification_report
 import joblib
 import os
 
-DATA_PATH = "data/RBLX.csv"
-MODEL_PATH = "models/lstm_model.pt"
-SCALER_PATH = "models/scaler.pkl"
 
-# Hype-paras
+
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_PATH   = os.path.join(_ROOT, "data", "RBLX.csv")
+MODEL_PATH  = os.path.join(_ROOT, "models", "lstm_model.pt")
+SCALER_PATH = os.path.join(_ROOT, "models", "scaler.pkl")
+
+
 SEQ_LEN     = 20
 HIDDEN_SIZE = 64
 NUM_LAYERS  = 2
@@ -35,21 +38,22 @@ def load_and_engineer(path: str) -> pd.DataFrame:
 
 
     # feats.
-    df["Return"]       = df["Close"].pct_change()
-    df["HL_range"]     = (df["High"] - df["Low"]) / df["Close"]
-    df["OC_range"]     = (df["Close"] - df["Open"]) / df["Open"]
+    df["Return"]       = df["Close"].pct_change()                   # day by day change
+    df["HL_range"]     = (df["High"] - df["Low"]) / df["Close"]      
+    df["OC_range"]     = (df["Close"] - df["Open"]) / df["Open"]    
     df["Vol_change"]   = df["Volume"].pct_change()
 
     for lag in [1, 2, 3, 5]:
         df[f"Return_lag{lag}"] = df["Return"].shift(lag)
 
     for w in [5, 10, 20]:
-        df[f"MA{w}"]    = df["Close"].rolling(w).mean() / df["Close"] - 1
-        df[f"Vol_MA{w}"] = df["Volume"].rolling(w).mean() / df["Volume"] - 1
+        df[f"MA{w}"]    = df["Close"].rolling(w).mean() / df["Close"] - 1       # moving avg
+        df[f"Vol_MA{w}"] = df["Volume"].rolling(w).mean() / df["Volume"] - 1    # vol mov avg
 
-    # Label: 1 if next day's close > today's close
+    # if next day's close > today's close
     df["Target"] = (df["Close"].shift(-1) > df["Close"]).astype(int)
 
+    # cleaning
     df.dropna(inplace=True)
     df.reset_index(drop=True, inplace=True)
     return df
@@ -110,11 +114,10 @@ def train():
     train_dl = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
     test_dl  = DataLoader(test_ds,  batch_size=BATCH_SIZE)
 
-    # ── Model ──
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model  = LSTMClassifier(len(feature_cols), HIDDEN_SIZE, NUM_LAYERS, DROPOUT).to(device)
 
-    # Class-weight to handle imbalance
+    # handle imbalance
     counts  = np.bincount(y_train)
     weights = torch.tensor(len(y_train) / (2 * counts), dtype=torch.float32).to(device)
     criterion = nn.CrossEntropyLoss(weight=weights)
@@ -124,7 +127,7 @@ def train():
 
 
     best_val_acc = 0.0
-    for epoch in range(1, EPOCHS + 1): # Training loop
+    for epoch in range(1, EPOCHS + 1): # train loop
         model.train()
         train_loss = 0.0
         for xb, yb in train_dl:
@@ -160,7 +163,7 @@ def train():
                   f"val_loss={val_loss/len(test_dl):.4f}  "
                   f"val_acc={val_acc:.4f}  {'✓ saved' if val_acc == best_val_acc else ''}")
 
-    # Final eval
+
     model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
     model.eval()
     all_preds, all_true = [], []
@@ -170,13 +173,13 @@ def train():
             all_preds.extend(logits.argmax(1).cpu().tolist())
             all_true.extend(yb.tolist())
 
-    print("\n── Final Test Results ─────────────────────────────")
+    print("\nFinal Test Results")
     print(f"Best Val Accuracy : {best_val_acc:.4f}")
     print(f"Test  Accuracy    : {accuracy_score(all_true, all_preds):.4f}")
     print("\nClassification Report:")
     print(classification_report(all_true, all_preds, target_names=["Down", "Up"]))
-    print(f"\nModel  saved → {MODEL_PATH}")
-    print(f"Scaler saved → {SCALER_PATH}")
+    print(f"\nModel  saved >> {MODEL_PATH}")
+    print(f"Scaler saved >> {SCALER_PATH}")
 
 
 if __name__ == "__main__":
