@@ -1,0 +1,25 @@
+__pycache__/
+*.pyc
+
+.ipynb_checkpoints/
+
+# virt envs
+venv/
+.venv/
+env/
+.env
+
+# model files
+*.pkl
+*.joblib
+*.pt
+*.h5
+
+data/
+models/*.pkl
+
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
