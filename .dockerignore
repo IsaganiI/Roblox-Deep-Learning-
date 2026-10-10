@@ -1,0 +1,13 @@
+.git
+**/__pycache__
+*.pyc
+notebooks/
+data/
+models/
+out/
+src/
+*.html
+*.css
+*.js
+data.json
+export_data.py
