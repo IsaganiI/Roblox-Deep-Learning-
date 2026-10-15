@@ -61,6 +61,50 @@ docker run --rm -v "$PWD/models:/app/models" -v "$PWD/out:/app/out" striax daily
 
 Pointing the three directories at S3 is all that's needed to run on AWS; no code changes.
 
+## Run on AWS (ECS Fargate)
+
+```
+ECR (image) ──▶ ECS Fargate task ──reads/writes──▶ S3: s3://striax-<account>/models, /out
+                       │
+                       └──logs──▶ CloudWatch: /ecs/striax
+```
+
+One-time setup (Windows PowerShell, from the repo root; needs AWS CLI configured):
+
+```powershell
+$ACCOUNT  = aws sts get-caller-identity --query Account --output text
+$REGISTRY = "$ACCOUNT.dkr.ecr.us-east-1.amazonaws.com"
+
+aws ecr create-repository --repository-name striax --region us-east-1
+aws s3 mb "s3://striax-$ACCOUNT" --region us-east-1
+
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $REGISTRY
+docker build -t striax .
+docker tag striax:latest "$REGISTRY/striax:latest"
+docker push "$REGISTRY/striax:latest"
+
+powershell -ExecutionPolicy Bypass -File .\deploy\setup.ps1
+```
+
+Run it:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\deploy\run.ps1 -Command all   # first run: full retrain
+powershell -ExecutionPolicy Bypass -File .\deploy\run.ps1                # daily: fetch + predict
+```
+
+`deploy/` contents:
+
+| File | Purpose |
+|---|---|
+| `setup.ps1` | Creates/updates log group, IAM roles, ECS cluster, task definition (safe to re-run) |
+| `run.ps1` | Starts one Fargate task, waits, prints logs and the result |
+| `taskdef.json` | Task definition template (1 vCPU, 2 GB, S3 settings) |
+| `task-role-policy.json` | Least-privilege S3 access: only the STRIAX bucket |
+| `ecs-tasks-trust.json` | Lets ECS tasks assume the two roles |
+
+The task uses the default VPC with a public IP, so no NAT gateway (and its monthly cost) is needed.
+
 ## predictions.csv columns
 
 `as_of_date, ticker, last_close, predicted_direction, prob_up, model_version, created_at,
