@@ -1,0 +1,34 @@
+{
+  "family": "__NAME__",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "2048",
+  "runtimePlatform": {
+    "operatingSystemFamily": "LINUX",
+    "cpuArchitecture": "__ARCH__"
+  },
+  "executionRoleArn": "arn:aws:iam::__ACCOUNT__:role/__NAME__-execution-role",
+  "taskRoleArn": "arn:aws:iam::__ACCOUNT__:role/__NAME__-task-role",
+  "containerDefinitions": [
+    {
+      "name": "__NAME__",
+      "image": "__ACCOUNT__.dkr.ecr.__REGION__.amazonaws.com/__NAME__:latest",
+      "essential": true,
+      "command": ["daily"],
+      "environment": [
+        { "name": "STRIAX_MODEL_DIR", "value": "s3://__BUCKET__/models" },
+        { "name": "STRIAX_OUTPUT_DIR", "value": "s3://__BUCKET__/out" },
+        { "name": "AWS_DEFAULT_REGION", "value": "__REGION__" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/__NAME__",
+          "awslogs-region": "__REGION__",
+          "awslogs-stream-prefix": "__NAME__"
+        }
+      }
+    }
+  ]
+}
