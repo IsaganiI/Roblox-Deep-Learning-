@@ -93,6 +93,15 @@ powershell -ExecutionPolicy Bypass -File .\deploy\run.ps1 -Command all   # first
 powershell -ExecutionPolicy Bypass -File .\deploy\run.ps1                # daily: fetch + predict
 ```
 
+Run it automatically (EventBridge Scheduler, New York time):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\deploy\schedule.ps1            # weekdays 17:15 daily, Saturdays 10:00 retrain
+powershell -ExecutionPolicy Bypass -File .\deploy\schedule.ps1 -TestNow   # one-time run in 2 minutes
+powershell -ExecutionPolicy Bypass -File .\deploy\schedule.ps1 -Pause     # turn schedules off
+powershell -ExecutionPolicy Bypass -File .\deploy\schedule.ps1 -Remove    # delete schedules
+```
+
 `deploy/` contents:
 
 | File | Purpose |
@@ -102,6 +111,9 @@ powershell -ExecutionPolicy Bypass -File .\deploy\run.ps1                # daily
 | `taskdef.json` | Task definition template (1 vCPU, 2 GB, S3 settings) |
 | `task-role-policy.json` | Least-privilege S3 access: only the STRIAX bucket |
 | `ecs-tasks-trust.json` | Lets ECS tasks assume the two roles |
+| `schedule.ps1` | Creates/updates the daily and weekly-retrain schedules |
+| `scheduler-role-policy.json` | Scheduler may only start the STRIAX task |
+| `scheduler-trust.json` | Lets EventBridge Scheduler (this account only) assume its role |
 
 The task uses the default VPC with a public IP, so no NAT gateway (and its monthly cost) is needed.
 
